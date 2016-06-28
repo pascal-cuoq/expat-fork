@@ -97,9 +97,7 @@ typedef char ICHAR;
 
 typedef const XML_Char *KEY;
 
-typedef struct {
-  KEY name;
-} NAMED;
+typedef void NAMED;
 
 typedef struct {
   NAMED **v;
@@ -6046,7 +6044,7 @@ lookup(XML_Parser parser, HASH_TABLE *table, KEY name, size_t createSize)
     unsigned char step = 0;
     i = h & mask;
     while (table->v[i]) {
-      if (keyeq(name, table->v[i]->name))
+      if (keyeq(name, *(char **)(table->v[i])))
         return table->v[i];
       if (!step)
         step = PROBE_STEP(h, mask, table->power);
@@ -6067,7 +6065,7 @@ lookup(XML_Parser parser, HASH_TABLE *table, KEY name, size_t createSize)
       memset(newV, 0, tsize);
       for (i = 0; i < table->size; i++)
         if (table->v[i]) {
-          unsigned long newHash = hash(parser, table->v[i]->name);
+          unsigned long newHash = hash(parser, *(char **)(table->v[i]));
           size_t j = newHash & newMask;
           step = 0;
           while (newV[j]) {
@@ -6094,7 +6092,7 @@ lookup(XML_Parser parser, HASH_TABLE *table, KEY name, size_t createSize)
   if (!table->v[i])
     return NULL;
   memset(table->v[i], 0, createSize);
-  table->v[i]->name = name;
+  *(const char **)(table->v[i]) = name;
   (table->used)++;
   return table->v[i];
 }
